@@ -1,0 +1,7 @@
+(compile -s "doodle.scm" -J)
+(compile -s "doodle.import.scm")
+
+(install-extension
+ 'doodle
+ '("doodle.so" "doodle.import.so")
+ '((version 0.1)))

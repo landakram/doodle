@@ -1,0 +1,8 @@
+((egg "doodle.egg")
+ (synopsis "A minimal game 'framework' inspired by loeve.")
+ (author "Christian Kellermann")
+ (maintainer "Christian Kellermann")
+ (category gaming)
+ (license "BSD")
+ (needs cairo miscmacros sdl)
+ (files "doodle.setup" "doodle.scm" "doodle.meta"))
