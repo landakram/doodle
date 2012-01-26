@@ -36,7 +36,6 @@
          clear-screen
          current-background
          draw-line
-         event-handler
          filled-rectangle
          font-color
          font-size
