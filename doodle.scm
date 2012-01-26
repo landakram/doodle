@@ -191,7 +191,7 @@
 
   (sdl-wm-set-caption title "Pretty Pics Inc.")
   (current-background background)
-  (apply cairo-set-source-rgba `(,*c* ,@solid-black))
+  (apply cairo-set-source-rgba `(,*c* ,@background))
   (doto *c*
         (cairo-rectangle 0 0 width height)
         (cairo-fill)
