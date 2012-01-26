@@ -44,6 +44,7 @@
          rectangle
          remove-sprite!
          run-event-loop
+         save-screenshot
          set-font!
          show!
          solid-black
@@ -166,6 +167,9 @@
                     (set! y (+ y (* 1.5 (draw-text x y t align))))))
                 text)
       (draw-text x y text align)))
+
+(define (save-screenshot filename)
+  (cairo-surface-write-to-png *c-surface* filename))
 
 (define (new-doodle #!key
                     (width 680)
