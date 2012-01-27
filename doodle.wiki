@@ -1,0 +1,235 @@
+[[tags: egg]]
+
+== doodle - A minimal game 'framework'.
+
+[[toc:]]
+
+=== Description
+
+A minimal game 'framework' inspired by [[http://love2d.org/|löve]].
+
+'''This is still a work in progress and subject to change!'''
+
+=== Author
+
+[[/users/christian-kellermann|Christian Kellermann]]
+
+=== Requirements
+
+Requires the [[miscmacros]], [[cairo]] and [[sdl]] extensions.
+
+=== General program flow of a doodle
+
+A program creates a window, called a 'doodle' here and registers for
+any of these three events: world-inits, world-ends and
+world-changes. world-inits is called upon the first iteration of the
+event loop, world-ends last and world-changes for every iteration.
+
+world-inits and world-ends are thunks, whereas world-changes has the
+following signature:
+
+<procedure>(world-changes (lambda (event dt escape-continuation) ...)</procedure>
+
+; event : holds the occured event of this loop iteration
+; dt : holds the time delta between the last and this iteration
+; escape-continuation : holds the continuation that will exit the loop
+
+Please see below for a detailed list of supported {{event}} symbols.
+
+{{dt}} is a flonum which can be used to adjust speed of animations for
+example.
+
+The game loop is started with the {{(run-event-loop)}} procedure.
+Usually the game loop will run as fast as it can unless the keyword
+parameter {{minimum-wait}} has been given which adds that minimum
+delay between iterations.
+
+=== API Documentation
+
+This egg is still under development; the API might change a bit in
+future versions.
+
+==== Event loop
+===== Procedures
+<procedure>(run-event-loop #!key
+                           (run-in-background #f)
+                           (minimum-wait 0))</procedure>
+
+Starts the event loop and runs {{world-inits}}. If
+{{run-in-background}} is #t a new thread is started. Within the event
+loop the procedure given with {{world-changes}} is called with the
+time delta of the last call and the events that occured. If
+{{minimum-wait}} is given and the delta is smaller than
+{{minimum-wait}} the thread will sleep for the remaining
+time. {{minimum-wait}} takes a value in milliseconds.
+
+===== Parameters
+<parameter>(world-inits (lambda () ...))</parameter>
+
+A thunk that is called once when the event loop is started.
+
+<parameter>(world-ends (lambda () ...))</parameter>
+
+A thunk that is called once when the even loop is exited.
+
+<parameter>(world-changes (lambda (event dt exit-continuation) ...))</parameter>
+
+A procedure that gets called every iteration of the event loop. The
+{{event}} parameter holds the event, {{dt}} is the time difference in
+milliseconds between the last and current
+iteration. {{exit-continuation}} can be used to jump out of the
+event-loop.
+
+===== Events
+
+One event is a list containing information about the individual
+event. There are currently 3 types of handled events:
+
+; quit : The quit event has the following form {{(quit)}}.
+; key events : The first element of the list is either the symbol
+  {{pressed}} or {{released}} followed by either the integer for the
+  key code or the symbols {{up}}, {{down}}, {{left}} or {{right}}
+  representing cursor keys.
+; unknown : This will list all other events. The list contains the
+  symbol {{unknown}} and the SDL event type. See the SDL egg
+  documentation for hints on what this may be.
+
+==== Drawing
+===== Colors
+
+Colors in doodle are represented as simple lists representing RGBA
+values one number each. Currently there are two predefined colors:
+
+; solid-black : {{(0 0 0 1)}}
+; solid-white : {{(1 1 1 1)}}
+
+===== Procedures
+
+<procedure>(new-doodle #!key
+                    (width 680)
+                    (height 460)
+                    (title "Doodle")
+                    (background solid-black)
+                    (fullscreen #f))</procedure>
+
+Initialises the internal state and createas a window with the given
+dimensions and title.
+
+<procedure>(show!)</procedure>
+
+Causes a redraw of the window.
+
+<procedure>(clear-screen!)</procedure>
+
+Fills the screen with the {{current-background}} color.
+
+<procedure>(rectangle x y width height color)</procedure>
+
+Draws a rectangle at the given coordinates {{(x, y)}} with the
+dimensions {{width}} and {{height}}. The border is drawn in {{color}}.
+
+<procedure>(filled-rectangle x y width height color)</procedure>
+
+Draws a rectangle at the given coordinates {{(x, y)}} with the
+dimensions {{width}} and {{height}}. The border is drawn in
+{{color}}. The rectangle also is filled with {{color}}.
+
+<procedure>(circle x y diameter color)</procedure>
+
+Draws a circle at the point defined by {{(x,y)}} with the given
+{{diameter}} and {{color}}. The border is drawn in {{color}}.
+
+<procedure>(filled-circle x y diameter color)</procedure>
+
+Draws a circle at the point defined by {{(x,y)}} with the given
+{{diameter}} and {{color}}. The border is drawn in {{color}}. The
+circle is filled in {{color}} too.
+
+<procedure>(draw-line x1 y1 x2 y2
+                   #!key
+                   (color solid-white)
+                   (style #:solid))</procedure>
+
+Draw a line between the two points {{(x1,y1)}} and {{(x2,y2)}} in the
+given style. Valid {{style}}s are either {{#:solid}} (the default) or
+{{#:dashed}} for dashed lines. The line is drawn in {{color}}.
+
+<procedure>(set-font! font size color)</procedure>
+
+Sets the font to {{font}}, given {{size}} and {{color}}. {{font}} is a
+string representing the font's name. Every X11 TTF font is applicable.
+
+<procedure>(text x y text #!key (align #:left))</procedure>
+
+Print the given text in one line starting on point
+{{(x,y)}}. Alignment can be changed with the {{align}}
+parameter. Supported alignment values are {{#:left}}, {{#:center}} and
+{{#:right}}.
+
+<procedure>(save-screenshot filename)</procedure>
+
+Saves the current screen content to a file called {{filename}} as a
+portable network graphics (PNG). It is up to the user to provide an
+appropriate extension to the filename.
+
+===== Parameters
+
+<parameter>(font-color)</parameter>
+
+Holds the current font color.
+
+<parameter>(font-size)</parameter>
+
+Holds the current font-size.
+
+<parameter>(current-background)</parameter>
+
+Holds the current background color.
+
+==== Collision detection
+
+*sprites*
+<procedure>add-sprite!</procedure>
+<procedure>check-for-collisions</procedure>
+<procedure>make-sprite</procedure>
+<procedure>remove-sprite!</procedure>
+<procedure>update-sprite!</procedure>
+
+==== Example
+
+<enscript highlight="scheme">
+</enscript>
+
+=== Changelog
+
+; 0.1 : Initial version
+
+=== License
+
+  Copyright (c) 2012, Christian Kellermann
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+      Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+ 
+      Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+ 
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+  COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+  OF THE POSSIBILITY OF SUCH DAMAGE.
