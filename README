@@ -1,0 +1,23 @@
+Welcome to doodle - A minimal 'framework' for your games, visualisations etc.
+
+Doodle is written in CHICKEN scheme, which is available at
+http://www.call-cc.org.
+
+It abstracts simple graphic rountines and window handling on top of
+cairo / SDL which should make visualisation tasks and exporting these
+drawings as well as writing games more fun and easy.
+
+doodle also provides a simple event loop model which has got its
+inspiration from the LUA Löve framework, making it easy to do
+animations and move sprites around.
+
+Doodle comes with a sprite detection mechanism.
+
+To install doodle you can use CHICKEN schemes chicken-install tool:
+
+$ chicken-install doodle
+
+See the tennis game for an example. You can grab tennis from bitbucket:
+https://bitbucket.org/ckeen/tennis
+
+Doodle is available under the BSD license.
