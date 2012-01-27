@@ -127,11 +127,12 @@
 
 (define (draw-line x1 y1 x2 y2
                    #!key
+                   (color solid-white)
                    (style #:solid))
   (doto *c*
         (cairo-new-path)
         (cairo-move-to x1 y1))
-  (set-color solid-white)
+  (set-color color)
   (case style
     ((#:solid)
      (cairo-set-dash *c* (make-f64vector 0) 0 0))
