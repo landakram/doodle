@@ -319,9 +319,8 @@
               escape)
              (show!)
              (set! last now)
-             (when
-                 minimum-wait
-               (thread-sleep! minimum-wait))
+             (when (and minimum-wait (< dt minimum-wait))
+               (thread-sleep! (- minimum-wait dt)))
              (loop)))))
       ((world-ends))
       (sdl-quit))))
