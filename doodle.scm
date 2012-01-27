@@ -36,6 +36,7 @@
          clear-screen
          current-background
          draw-line
+         filled-circle
          filled-rectangle
          font-color
          font-size
@@ -96,6 +97,11 @@
           (cairo-text-extents-height ex)))
 
 (define (circle x y diameter color)
+  (set-color color)
+  (doto *c*
+        (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))))
+
+(define (filled-circle x y diameter color)
   (set-color color)
   (doto *c*
         (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))
