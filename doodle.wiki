@@ -51,9 +51,7 @@ future versions.
 
 ==== Event loop
 ===== Procedures
-<procedure>(run-event-loop #!key
-                           (run-in-background #f)
-                           (minimum-wait 0))</procedure>
+<procedure>(run-event-loop #!key (run-in-background #f) (minimum-wait 0))</procedure>
 
 Starts the event loop and runs {{world-inits}}. If
 {{run-in-background}} is #t a new thread is started. Within the event
@@ -86,13 +84,8 @@ One event is a list containing information about the individual
 event. There are currently 3 types of handled events:
 
 ; quit : The quit event has the following form {{(quit)}}.
-; key events : The first element of the list is either the symbol
-  {{pressed}} or {{released}} followed by either the integer for the
-  key code or the symbols {{up}}, {{down}}, {{left}} or {{right}}
-  representing cursor keys.
-; unknown : This will list all other events. The list contains the
-  symbol {{unknown}} and the SDL event type. See the SDL egg
-  documentation for hints on what this may be.
+; key events : The first element of the list is either the symbol {{pressed}} or {{released}} followed by either the integer for the key code or the symbols {{up}}, {{down}}, {{left}} or {{right}} representing cursor keys.
+; unknown : This will list all other events. The list contains the symbol {{unknown}} and the SDL event type. See the SDL egg documentation for hints on what this may be.
 
 ==== Drawing
 ===== Colors
@@ -105,12 +98,7 @@ values one number each. Currently there are two predefined colors:
 
 ===== Procedures
 
-<procedure>(new-doodle #!key
-                    (width 680)
-                    (height 460)
-                    (title "Doodle")
-                    (background solid-black)
-                    (fullscreen #f))</procedure>
+<procedure>(new-doodle #!key (width 680) (height 460) (title "Doodle") (background solid-black) (fullscreen #f))</procedure>
 
 Initialises the internal state and createas a window with the given
 dimensions and title.
@@ -145,10 +133,7 @@ Draws a circle at the point defined by {{(x,y)}} with the given
 {{diameter}} and {{color}}. The border is drawn in {{color}}. The
 circle is filled in {{color}} too.
 
-<procedure>(draw-line x1 y1 x2 y2
-                   #!key
-                   (color solid-white)
-                   (style #:solid))</procedure>
+<procedure>(draw-line x1 y1 x2 y2 #!key (color solid-white) (style #:solid))</procedure>
 
 Draw a line between the two points {{(x1,y1)}} and {{(x2,y2)}} in the
 given style. Valid {{style}}s are either {{#:solid}} (the default) or
@@ -189,10 +174,15 @@ Holds the current background color.
 ==== Collision detection
 
 *sprites*
+
 <procedure>add-sprite!</procedure>
+
 <procedure>check-for-collisions</procedure>
+
 <procedure>make-sprite</procedure>
+
 <procedure>remove-sprite!</procedure>
+
 <procedure>update-sprite!</procedure>
 
 ==== Example
