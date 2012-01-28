@@ -181,6 +181,21 @@
 (define (save-screenshot filename)
   (cairo-surface-write-to-png *c-surface* filename))
 
+(define (insert-image-as-background filename)
+  (let* ((width (cairo-image-surface-get-width *c-surface*))
+         (height (cairo-image-surface-get-height *c-surface*))
+         (img (cairo-image-surface-create-from-png filename))
+         (img-width (cairo-image-surface-get-width img))
+         (img-height (cairo-image-surface-get-height img)))
+    (doto *c*
+          (cairo-set-source-rgba 0 0 0 1)
+          (cairo-rectangle 0 0 width height)
+          (cairo-fill)
+          (cairo-stroke)
+          (cairo-scale (/ width img-width) (/ height img-height))
+          (cairo-set-source-surface img 0 0))
+    (cairo-surface-destroy img)))
+
 (define (new-doodle #!key
                     (width 680)
                     (height 460)
@@ -210,17 +225,14 @@
   (current-background background)
 
   (if (string? background)
-      (doto *c*
-        (cairo-set-source-surface
-         (cairo-image-surface-create-from-png background)
-         0 0)
-        )
-        (apply cairo-set-source-rgba `(,*c* ,@background)))
+      (insert-image-as-background background)
+      (apply cairo-set-source-rgba `(,*c* ,@background)))
 
   (doto *c*
         (cairo-rectangle 0 0 width height)
         (cairo-fill)
-        (cairo-stroke))
+        (cairo-stroke)
+        (cairo-paint))
 
   (sdl-flip *s*))
 
@@ -229,15 +241,7 @@
       (height (cairo-image-surface-get-height *c-surface*)))
   (if (list? color)
       (apply cairo-set-source-rgba `(,*c* ,@color))
-      (begin
-        (doto *c*
-              (cairo-set-source-rgba 0 0 0 1)
-              (cairo-rectangle 0 0 width height)
-              (cairo-fill)
-              (cairo-stroke)
-              (cairo-set-source-surface
-               (cairo-image-surface-create-from-png color)
-               0 0))))
+      (insert-image-as-background color))
   (doto *c*
         (cairo-rectangle 0 0 width height)
         (cairo-fill)
