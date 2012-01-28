@@ -200,23 +200,45 @@
 
   (set! *c* (cairo-create *c-surface*))
 
+
+
   (sdl-wm-set-caption title "Pretty Pics Inc.")
+
   (current-background background)
-  (apply cairo-set-source-rgba `(,*c* ,@background))
+
+  (if (string? background)
+      (doto *c*
+        (cairo-set-source-surface
+         (cairo-image-surface-create-from-png background)
+         0 0)
+        )
+        (apply cairo-set-source-rgba `(,*c* ,@background)))
+
   (doto *c*
         (cairo-rectangle 0 0 width height)
         (cairo-fill)
         (cairo-stroke))
+
   (sdl-flip *s*))
 
 (define (clear-screen #!optional (color (current-background)))
-  (let ((width (cairo-image-surface-get-width *c-surface*))
-        (height (cairo-image-surface-get-height *c-surface*)))
-    (apply cairo-set-source-rgba `(,*c* ,@color))
-    (doto *c*
-          (cairo-rectangle 0 0 width height)
-          (cairo-fill)
-          (cairo-stroke))))
+(let ((width (cairo-image-surface-get-width *c-surface*))
+      (height (cairo-image-surface-get-height *c-surface*)))
+  (if (list? color)
+      (apply cairo-set-source-rgba `(,*c* ,@color))
+      (begin
+        (doto *c*
+              (cairo-set-source-rgba 0 0 0 1)
+              (cairo-rectangle 0 0 width height)
+              (cairo-fill)
+              (cairo-stroke)
+              (cairo-set-source-surface
+               (cairo-image-surface-create-from-png color)
+               0 0))))
+  (doto *c*
+        (cairo-rectangle 0 0 width height)
+        (cairo-fill)
+        (cairo-stroke))))
 
 (define (show!)
   (cairo-surface-flush *c-surface*)

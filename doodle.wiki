@@ -103,13 +103,18 @@ values one number each. Currently there are two predefined colors:
 Initialises the internal state and createas a window with the given
 dimensions and title.
 
+The background parameter can either be a doodle RGBA color list or a
+string pointing to a PNG file.
+
 <procedure>(show!)</procedure>
 
 Causes a redraw of the window.
 
-<procedure>(clear-screen!)</procedure>
+<procedure>(clear-screen! #!optional (color (current-background)))</procedure>
 
-Fills the screen with the {{current-background}} color.
+Fills the screen with the {{current-background}} color. Color can
+also be given as a string representing a filename to a PNG image which
+will be loaded instead.
 
 <procedure>(rectangle x y width height color)</procedure>
 
