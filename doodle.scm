@@ -99,7 +99,8 @@
 (define (circle x y diameter color)
   (set-color color)
   (doto *c*
-        (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))))
+        (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))
+        (cairo-stroke)))
 
 (define (filled-circle x y diameter color)
   (set-color color)
@@ -127,9 +128,11 @@
 
 (define (draw-line x1 y1 x2 y2
                    #!key
+                   (width 1)
                    (color solid-white)
                    (style #:solid))
   (doto *c*
+        (cairo-set-line-width width)
         (cairo-new-path)
         (cairo-move-to x1 y1))
   (set-color color)
