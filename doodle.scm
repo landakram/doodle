@@ -310,6 +310,17 @@
 
 ;; Event stuff
 
+(define (translate-mouse-event type event)
+(let ((x (sdl-event-x event))
+      (y (sdl-event-y event)))
+  (if (equal? type SDL_MOUSEMOTION)
+      (list 'mouse 'moved x y)
+      (let ((b (sdl-event-button event)))
+        (list 'mouse
+              (if (equal? type SDL_MOUSEBUTTONUP)
+                  'pressed 'released)
+              x y b)))))
+
 (define (translate-key-event type event)
   (let ((k (sdl-event-sym event)))
     (list 
@@ -333,6 +344,12 @@
       (let ((t (sdl-event-type event)))
         (cond ((equal? t SDL_QUIT)
                (escape 'quit))
+              ((equal? t SDL_VIDEOEXPOSE)
+               '(redraw))
+              ((or (equal? t SDL_MOUSEBUTTONUP)
+                   (equal? t SDL_MOUSEBUTTONDOWN)
+                   (equal? t SDL_MOUSEMOTION))
+               (translate-mouse-event t event))
               ((or (equal? t SDL_KEYDOWN)
                    (equal? t SDL_KEYUP))
                (translate-key-event t event))
