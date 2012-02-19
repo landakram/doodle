@@ -372,7 +372,7 @@
               escape)
              (show!)
              (set! last now)
-             (when (and minimum-wait (< dt minimum-wait))
+             (when (< dt minimum-wait)
                (thread-sleep! (- minimum-wait dt)))
              (loop)))))
       ((world-ends))
