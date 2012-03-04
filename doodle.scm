@@ -361,9 +361,16 @@
                (translate-key-event t event))
               (else (list 'unknown event))))))
 
+(define (collect-events)
+  (let pump ((events '()))
+    (let ((event (make-sdl-event)))
+      (if (sdl-poll-event! event)
+          (pump (cons event events))
+          (reverse events)))))
+
 (define (event-handler #!optional minimum-wait)
   (lambda ()
-    (let ((event (make-sdl-event))
+    (let (
           (last (current-milliseconds)))
       (call-with-current-continuation
        (lambda (escape)
@@ -371,9 +378,9 @@
            (let* ((now (current-milliseconds))
                   (dt (min (/ 1 30) (/ (- now last)
                                        1000))))
-             (sdl-pump-events)
              ((world-changes)
-              (translate-events (if (sdl-poll-event! event) event #f) escape)
+              (map (cut translate-events <> escape)
+                   (collect-events))
               dt
               escape)
              (show!)
