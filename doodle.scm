@@ -323,7 +323,7 @@
       (list 'mouse 'moved x y)
       (let ((b (sdl-event-button event)))
         (list 'mouse
-              (if (equal? type SDL_MOUSEBUTTONUP)
+              (if (equal? type SDL_MOUSEBUTTONDOWN)
                   'pressed 'released)
               x y b)))))
 
