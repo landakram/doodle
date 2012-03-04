@@ -370,8 +370,7 @@
 
 (define (event-handler #!optional minimum-wait)
   (lambda ()
-    (let (
-          (last (current-milliseconds)))
+    (let ((last (current-milliseconds)))
       (call-with-current-continuation
        (lambda (escape)
          (let loop ()
