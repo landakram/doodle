@@ -35,6 +35,8 @@
          circle
          clear-screen
          current-background
+         doodle-width
+         doodle-height
          draw-line
          filled-circle
          filled-rectangle
@@ -69,6 +71,9 @@
 (define *c* #f)
 (define *c-surface* #f)
 (define *s* #f)
+
+(define doodle-width #f)
+(define doodle-height #f)
 
 (define (expect-procedure p)
   (unless (procedure? p)
@@ -218,7 +223,8 @@
 
   (set! *c* (cairo-create *c-surface*))
 
-
+  (set! doodle-width width)
+  (set! doodle-height height)
 
   (sdl-wm-set-caption title "Pretty Pics Inc.")
 
