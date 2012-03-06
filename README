@@ -11,13 +11,22 @@ doodle also provides a simple event loop model which has got its
 inspiration from the LUA Löve framework, making it easy to do
 animations and move sprites around.
 
-Doodle comes with a sprite detection mechanism.
+Doodle comes with an experimental sprite detection mechanism.
 
 To install doodle you can use CHICKEN schemes chicken-install tool:
 
 $ chicken-install doodle
 
-See the tennis game for an example. You can grab tennis from bitbucket:
-https://bitbucket.org/ckeen/tennis
+Examples:
+
+- The tennis game has been the first game written in doodle. You can
+  grab tennis from bitbucket: https://bitbucket.org/ckeen/tennis
+- A graphical game of life has been published at:
+  https://bitbucket.org/ckeen/game-of-life
+- A turtle graphic system drawing lindenmayer plants has been published at:
+  https://bitbucket.org/ckeen/game-of-life/overview
+
+If you know about other programs written with doodle, please let me
+know, so I can add them to this list!
 
 Doodle is available under the BSD license.
