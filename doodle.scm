@@ -59,7 +59,7 @@
          world-ends)
 
 (import chicken scheme)
-(use (srfi 1 4 18) cairo data-structures extras sdl miscmacros)
+(use (srfi 1 4 18) cairo data-structures extras sdl clojurian-syntax)
 
 (define font-color (make-parameter (list 0 0 0 1)))
 (define font-size (make-parameter 12))
