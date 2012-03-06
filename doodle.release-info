@@ -1,3 +1,4 @@
 (repo git "https://bitbucket.org/ckeen/{egg-name}.git")
 (uri targz "https://bitbucket.org/ckeen/{egg-name}/get/{egg-release}.tar.gz")
 (release "0.1")
+(release "0.2")
