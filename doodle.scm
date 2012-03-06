@@ -329,7 +329,7 @@
 
 (define (translate-key-event type event)
   (let ((k (sdl-event-sym event)))
-    (list 
+    (list 'key
      (if (equal? type SDL_KEYUP)
          'released 'pressed)
      (cond ((equal? k SDLK_UP)
