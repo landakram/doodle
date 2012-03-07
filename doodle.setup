@@ -4,4 +4,4 @@
 (install-extension
  'doodle
  '("doodle.so" "doodle.import.so")
- '((version 0.1)))
+ '((version 0.3)))
