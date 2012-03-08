@@ -31,6 +31,7 @@
 (module doodle
         (*sprites*
          add-sprite!
+         blit-image
          check-for-collisions
          circle
          clear-screen
@@ -38,6 +39,7 @@
          doodle-width
          doodle-height
          draw-line
+         define-resource
          filled-circle
          filled-rectangle
          font-color
@@ -59,7 +61,7 @@
          world-ends)
 
 (import chicken scheme)
-(use (srfi 1 4 18) cairo data-structures extras sdl clojurian-syntax)
+(use (srfi 1 4 18) cairo data-structures extras sdl clojurian-syntax matchable)
 
 (define font-color (make-parameter (list 0 0 0 1)))
 (define font-size (make-parameter 12))
@@ -313,6 +315,60 @@
   (set! *sprites* (alist-update! (sprite-name s) s *sprites*)))
 
 (define add-sprite! update-sprite!)
+
+;; blitting tiles in
+
+(define *resources* '())
+
+(define-record img-res name file surface w h x-offset y-offset scale-factor)
+(define-record-printer (img-res i out)
+  (fprintf out "#,(img-res ~a ~s ~ax~a px (~ax~a) x ~a"
+           (img-res-name i)
+           (img-res-file i)
+           (img-res-w i)
+           (img-res-h i)
+           (img-res-x-offset i)
+           (img-res-y-offset i)
+           (img-res-scale-factor i)))
+
+
+(define (define-resource name type file . data)
+  (when (not (file-exists? file))
+    (error "Resource does not exist " file))
+  (match type
+         (#:image
+          (let* ((s (cairo-image-surface-create-from-png file))
+                 (w (cairo-image-surface-get-width s))
+                 (h (cairo-image-surface-get-height s))
+                 (offset? (and (not (null? data))
+                              (>= (length data) 2)))
+                 (x-off (if offset? (car data)))
+                 (y-off (if offset? (cadr data)))
+                 (scale-factor (and (= (length data) 3)
+                                    (caddr data))))
+            (set! *resources*
+                  (alist-update name (make-img-res name file s w h x-off y-off scale-factor)
+                                *resources*))))
+         (else (error "Unkown resource type " type))))
+
+(define (blit-image name x y)
+  (let ((img (alist-ref name *resources* equal?)))
+    (unless img
+      (error "No resource found with this name " name))
+    (let* ((scale (img-res-scale-factor img))
+           (scale (if scale scale 1))
+           (t (/ (- 1 scale) 2))
+           (x (+ x (* t (img-res-w img))
+                 (img-res-x-offset img)))
+           (y (+ y (* t (img-res-h img))
+                 (img-res-y-offset img))))
+      (doto *c*
+            (cairo-save)
+            (cairo-translate x y)
+            (cairo-scale scale scale)
+            (cairo-set-source-surface (img-res-surface img) 0 0)
+            (cairo-mask-surface (img-res-surface img) 0 0)
+            (cairo-restore)))))
 
 ;; Event stuff
 

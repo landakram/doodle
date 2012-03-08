@@ -4,5 +4,5 @@
  (maintainer "Christian Kellermann")
  (category graphics)
  (license "BSD")
- (needs cairo clojurian sdl)
+ (needs cairo clojurian matchable sdl)
  (files "doodle.setup" "doodle.scm" "doodle.meta"))
