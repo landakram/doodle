@@ -239,7 +239,7 @@
   (set! doodle-width width)
   (set! doodle-height height)
 
-  (sdl-wm-set-caption title "Pretty Pics Inc.")
+  (sdl-wm-set-caption title title)
 
   (current-background background)
 
