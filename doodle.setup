@@ -1,7 +1,9 @@
 (compile -s "doodle.scm" -J)
 (compile -s "doodle.import.scm")
+(compile -s "doodle-colors.scm" -J)
+(compile -s "doodle-colors.import.scm")
 
 (install-extension
  'doodle
- '("doodle.so" "doodle.import.so")
+ '("doodle.so" "doodle.import.so" "doodle-colors.so" "doodle-colors.import.so")
  '((version 0.3)))
