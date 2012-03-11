@@ -203,6 +203,13 @@
           (cairo-set-source-surface img 0 0))
     (cairo-surface-destroy img)))
 
+(define (sdl-colorspace->cairo bytes-per-pixel)
+  (case (* 8 bytes-per-pixel)
+    ((8) CAIRO_FORMAT_A8)
+    ((24) CAIRO_FORMAT_RGB24)
+    ((32) CAIRO_FORMAT_ARGB32)
+    (else CAIRO_FORMAT_ARGB32)))
+
 (define (new-doodle #!key
                     (width 680)
                     (height 460)
@@ -212,15 +219,19 @@
 
   (sdl-init SDL_INIT_EVERYTHING)
 
-  (set! *s* (sdl-set-video-mode width height 32 (+ SDL_HWSURFACE
+  (set! *s* (sdl-set-video-mode width height 0 (+ SDL_HWSURFACE
                                                   SDL_HWPALETTE
                                                   SDL_DOUBLEBUF
                                                   (if fullscreen
                                                       SDL_FULLSCREEN
                                                       0))))
+
   (set! *c-surface* (cairo-image-surface-create-for-data
               (sdl-surface-pixels *s*)
-              CAIRO_FORMAT_RGB24 width height
+              (sdl-colorspace->cairo (sdl-pixel-format-bytes-per-pixel
+                                      (sdl-surface-pixel-format *s*)))
+              width
+              height
               (sdl-surface-pitch *s*)))
 
   (set! *c* (cairo-create *c-surface*))
