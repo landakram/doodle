@@ -45,6 +45,7 @@
          font-color
          font-size
          make-sprite
+         line-width
          new-doodle
          rectangle
          remove-sprite!
@@ -65,6 +66,8 @@
 
 (define font-color (make-parameter (list 0 0 0 1)))
 (define font-size (make-parameter 12))
+
+(define line-width (make-parameter 2.0))
 
 (define current-background (make-parameter (list 0 0 0 1)))
 (define solid-black (list 0 0 0 1))
@@ -106,12 +109,14 @@
 (define (circle x y diameter color)
   (set-color color)
   (doto *c*
+        (cairo-set-line-width (line-width))
         (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))
         (cairo-stroke)))
 
 (define (filled-circle x y diameter color)
   (set-color color)
   (doto *c*
+        (cairo-set-line-width (line-width))
         (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))
         (cairo-fill)))
 
@@ -119,6 +124,7 @@
   (set-color color)
   (doto *c*
         (cairo-new-path)
+        (cairo-set-line-width (line-width))
         (cairo-set-dash (make-f64vector 0) 0 0)
         (cairo-rectangle x1 y1 width height)
         (cairo-fill)
@@ -128,6 +134,7 @@
   (set-color color)
   (doto *c*
         (cairo-new-path)
+        (cairo-set-line-width (line-width))
         (cairo-set-dash (make-f64vector 0) 0 0)
         (cairo-rectangle x1 y1 width height)
         (cairo-stroke)
@@ -135,7 +142,7 @@
 
 (define (draw-line x1 y1 x2 y2
                    #!key
-                   (width 1)
+                   (width (line-width))
                    (color solid-white)
                    (style #:solid))
   (doto *c*
