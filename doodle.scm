@@ -365,7 +365,7 @@
                  (scale-factor (and (= (length data) 3)
                                     (caddr data))))
             (set! *resources*
-                  (alist-update name (make-img-res name file s w h x-off y-off scale-factor)
+                  (alist-update! name (make-img-res name file s w h x-off y-off scale-factor)
                                 *resources*))))
          (else (error "Unkown resource type " type))))
 
