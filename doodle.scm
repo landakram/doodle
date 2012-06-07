@@ -56,6 +56,7 @@
          solid-black
          solid-white
          text
+         text-width
          update-sprite!
          world-changes
          world-inits
