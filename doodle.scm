@@ -361,8 +361,8 @@
                  (h (cairo-image-surface-get-height s))
                  (offset? (and (not (null? data))
                               (>= (length data) 2)))
-                 (x-off (if offset? (car data)))
-                 (y-off (if offset? (cadr data)))
+                 (x-off (if offset? (car data) 0))
+                 (y-off (if offset? (cadr data) 0))
                  (scale-factor (and (= (length data) 3)
                                     (caddr data))))
             (set! *resources*
