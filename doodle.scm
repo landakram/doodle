@@ -355,7 +355,7 @@
   (when (not (file-exists? file))
     (error "Resource does not exist " file))
   (match type
-         (#:image
+         ('#:image
           (let* ((s (cairo-image-surface-create-from-png file))
                  (w (cairo-image-surface-get-width s))
                  (h (cairo-image-surface-get-height s))
