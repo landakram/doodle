@@ -368,6 +368,35 @@
             (set! *resources*
                   (alist-update! name (make-img-res name file s w h x-off y-off scale-factor)
                                 *resources*))))
+         ('#:tileset
+          (when (or (null? data)
+                    (not (= (length data) 2)))
+                (error "Tileset needs tile-size and list of tiles but got " data))
+          (let* ((ts (cairo-image-surface-create-from-png file))
+                 (w (cairo-image-surface-get-width ts))
+                 (h (cairo-image-surface-get-height ts))
+                 (tile-size
+                  (if (number? (car data))
+                      (car data)
+                      (error "Tile-set parameter needs to be a number")))
+                 (tiles (if (list? (cadr data))
+                            (cadr data)
+                            (error "Second data parameter must be a list of tiles"))))
+            (for-each
+             (lambda (t)
+               (if (and (list t)
+                        (= (length t) 2))
+                   (let* ((tile-name (car t))
+                          (tile-number (cadr t))
+                          (tile-x (modulo (* tile-number tile-size) w))
+                          (tile-y (* tile-size (quotient (* tile-size tile-number) w)))
+                          (tile-img
+                           (cairo-surface-create-for-rectangle ts tile-x tile-y tile-size tile-size)))
+                     (set! *resources*
+                           (alist-update! (car t) (make-img-res tile-name file tile-img tile-size tile-size 0 0 #f)
+                                          *resources*)))
+                   (error "Malformed tile information entry " t)))
+             tiles)))
          (else (error "Unkown resource type " type))))
 
 (define (blit-image name x y)
