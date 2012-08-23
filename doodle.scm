@@ -110,16 +110,20 @@
 (define (circle x y diameter color)
   (set-color color)
   (doto *c*
+        (cairo-new-path)
         (cairo-set-line-width (line-width))
         (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))
-        (cairo-stroke)))
+        (cairo-stroke)
+        (cairo-close-path)))
 
 (define (filled-circle x y diameter color)
   (set-color color)
   (doto *c*
+        (cairo-new-path)
         (cairo-set-line-width (line-width))
         (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))
-        (cairo-fill)))
+        (cairo-fill)
+        (cairo-close-path)))
 
 (define (filled-rectangle x1 y1 width height color)
   (set-color color)
