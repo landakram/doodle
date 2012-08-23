@@ -175,7 +175,7 @@
                 (let ((fx (case align
                             ((#:center) (- x (/ w 2)))
                             ((#:left) x)
-                            ((#:right (- x w)))
+                            ((#:right) (- x w))
                             (else x)))
                       (fy y))
                   (apply cairo-set-source-rgba `(,*c* ,@(font-color)))
