@@ -200,21 +200,6 @@
 (define (save-screenshot filename)
   (cairo-surface-write-to-png *c-surface* filename))
 
-(define (insert-image-as-background filename)
-  (let* ((width (cairo-image-surface-get-width *c-surface*))
-         (height (cairo-image-surface-get-height *c-surface*))
-         (img (cairo-image-surface-create-from-png filename))
-         (img-width (cairo-image-surface-get-width img))
-         (img-height (cairo-image-surface-get-height img)))
-    (doto *c*
-          (cairo-set-source-rgba 0 0 0 1)
-          (cairo-rectangle 0 0 width height)
-          (cairo-fill)
-          (cairo-stroke)
-          (cairo-scale (/ width img-width) (/ height img-height))
-          (cairo-set-source-surface img 0 0))
-    (cairo-surface-destroy img)))
-
 (define (sdl-colorspace->cairo bytes-per-pixel)
   (case (* 8 bytes-per-pixel)
     ((8) CAIRO_FORMAT_A8)
@@ -253,11 +238,17 @@
 
   (sdl-wm-set-caption title title)
 
-  (current-background background)
-
   (if (string? background)
-      (insert-image-as-background background)
-      (apply cairo-set-source-rgba `(,*c* ,@background)))
+        (let* ((width (cairo-image-surface-get-width *c-surface*))
+               (height (cairo-image-surface-get-height *c-surface*))
+               (img (cairo-image-surface-create-from-png background))
+               (img-width (cairo-image-surface-get-width img))
+               (img-height (cairo-image-surface-get-height img)))
+          (print "width " width " img-width " img-width)
+          (define-resource (string->symbol background) #:image background 0 0  (/ height img-height)))
+        (apply cairo-set-source-rgba `(,*c* ,@background)))
+
+  (current-background background)
 
   (doto *c*
         (cairo-rectangle 0 0 width height)
@@ -271,12 +262,13 @@
 (let ((width (cairo-image-surface-get-width *c-surface*))
       (height (cairo-image-surface-get-height *c-surface*)))
   (if (list? color)
-      (apply cairo-set-source-rgba `(,*c* ,@color))
-      (insert-image-as-background color))
-  (doto *c*
-        (cairo-rectangle 0 0 width height)
-        (cairo-fill)
-        (cairo-stroke))))
+      (begin
+        (apply cairo-set-source-rgba `(,*c* ,@color))
+        (doto *c*
+              (cairo-rectangle 0 0 width height)
+              (cairo-fill)
+              (cairo-stroke)))
+      (blit-image (string->symbol color) 0 0))))
 
 (define (show!)
   (cairo-surface-flush *c-surface*)
