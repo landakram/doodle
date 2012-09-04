@@ -6,4 +6,4 @@
 (install-extension
  'doodle
  '("doodle.so" "doodle.import.so" "doodle-colors.so" "doodle-colors.import.so")
- '((version 0.9)))
+ '((version 0.10)))
