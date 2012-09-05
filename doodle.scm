@@ -63,7 +63,7 @@
          world-ends)
 
 (import chicken scheme)
-(use (srfi 1 4 18) cairo data-structures extras sdl clojurian-syntax matchable)
+(use (srfi 1 4 18) cairo data-structures extras sdl-base clojurian-syntax matchable)
 
 (define font-color (make-parameter (list 0 0 0 1)))
 (define font-size (make-parameter 12))
