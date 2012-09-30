@@ -487,7 +487,7 @@
           (pump (cons event events))
           (reverse events)))))
 
-(define (event-handler #!optional (minimum-wait *minimum-wait*))
+(define (event-handler minimum-wait)
   (lambda ()
     (let ((last (current-milliseconds)))
       (call-with-current-continuation
@@ -525,7 +525,8 @@
 
 (define (run-event-loop #!key
                         (run-in-background #f)
-                        (minimum-wait 0))
+                        (minimum-wait *minimum-wait*))
+  (set! *minimum-wait* minimum-wait)
   (call-with-current-continuation
    (lambda (k)
      (with-exception-handler
