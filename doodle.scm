@@ -485,23 +485,44 @@
            (let* ((now (current-milliseconds))
                   (dt (min (/ 1 30) (/ (- now last)
                                        1000))))
-             ((world-changes)
-              (map (cut translate-events <> escape)
-                   (collect-events))
-              dt
-              escape)
+             (call-with-current-continuation
+              (lambda (k)
+                (with-exception-handler
+                 (lambda (e)
+                   (fprintf (current-error-port) "Exception in world-changes: ~a, disabling world-changes.~%" ((condition-property-accessor 'exn 'message) e))
+                   (k (world-changes values)))
+                 (lambda ()
+                   ((world-changes)
+                    (map (cut translate-events <> escape)
+                         (collect-events))
+                    dt
+                    escape)))))
              (show!)
              (set! last now)
              (when (< dt minimum-wait)
                (thread-sleep! (- minimum-wait dt)))
              (loop)))))
-      ((world-ends))
-      (sdl-quit))))
+             (call-with-current-continuation
+              (lambda (k)
+                (with-exception-handler
+                 (lambda (e)
+                   (fprintf (current-error-port) "Exception in world-ends: ~a, ignoring world-ends.~%" ((condition-property-accessor 'exn 'message) e))
+                   (k (world-ends values)))
+                 (lambda ()
+                   ((world-ends))))))
+             (sdl-quit))))
 
 (define (run-event-loop #!key
                         (run-in-background #f)
                         (minimum-wait 0))
-  ((world-inits))
+  (call-with-current-continuation
+   (lambda (k)
+     (with-exception-handler
+      (lambda (e)
+        (fprintf (current-error-port) "Exception in world-inits: ~a, ignoring world-inits.~%" ((condition-property-accessor 'exn 'message) e))
+        (k (world-inits values)))
+      (lambda ()
+        ((world-inits))))))
   (sdl-flip *s*)
   (if run-in-background
       (thread-start!
