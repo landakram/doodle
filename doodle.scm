@@ -66,12 +66,29 @@
 (import chicken scheme)
 (use (srfi 1 4 18) cairo data-structures extras sdl-base clojurian-syntax matchable)
 
-(define font-color (make-parameter (list 0 0 0 1)))
-(define font-size (make-parameter 12))
+(define *font-color* '(list 1 1 1 1))
+(define (font-color . c)
+ (if (null? c)
+     *font-color*
+     (set! *font-color* c)))
+(define *font-size* 12)
+(define (font-size . s)
+  (if (null? s)
+      *font-size*
+      (set! *font-size* s)))
 
-(define line-width (make-parameter 2.0))
+(define *line-width* 2.0)
+(define (line-width . w)
+  (if (null? w)
+      *line-width*
+      (set! *line-width* w)))
 
-(define current-background (make-parameter (list 0 0 0 1)))
+(define *current-background* '(0 0 0 1))
+(define (current-background . c)
+  (if (null? c)
+      *current-background*
+      (set! *current-background* c)))
+
 (define solid-black (list 0 0 0 1))
 (define solid-white (list 1 1 1 1))
 
@@ -82,10 +99,6 @@
 (define doodle-width #f)
 (define doodle-height #f)
 
-(define (expect-procedure p)
-  (unless (procedure? p)
-    (error "This parameter can be set to procedures only, you gave it " p))
-  p)
 
 (define *world-inits* values)
 (define *world-changes* values)
@@ -106,14 +119,14 @@
     ((_ color) (apply cairo-set-source-rgba `(,*c* ,@color)))))
 
 (define (set-font! font size color)
-  (font-color color)
-  (font-size size)
+  (set! *font-color* color)
+  (set! *font-size* size)
   (cairo-select-font-face *c* font CAIRO_FONT_SLANT_NORMAL CAIRO_FONT_WEIGHT_NORMAL)
-  (cairo-set-font-size *c* (font-size)))
+  (cairo-set-font-size *c* *font-size*))
 
 (define (text-width text)
   (define ex (make-cairo-text-extents-type))
-  (cairo-set-font-size *c* (font-size))
+  (cairo-set-font-size *c* *font-size*)
   (cairo-text-extents *c* text ex)
   (values (cairo-text-extents-width ex)
           (cairo-text-extents-height ex)))
@@ -122,7 +135,7 @@
   (set-color color)
   (doto *c*
         (cairo-new-path)
-        (cairo-set-line-width (line-width))
+        (cairo-set-line-width *line-width*)
         (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))
         (cairo-stroke)
         (cairo-close-path)))
@@ -131,7 +144,7 @@
   (set-color color)
   (doto *c*
         (cairo-new-path)
-        (cairo-set-line-width (line-width))
+        (cairo-set-line-width *line-width*)
         (cairo-arc x y (/ diameter 2) 0 (* 2 cairo-pi))
         (cairo-fill)
         (cairo-close-path)))
@@ -140,7 +153,7 @@
   (set-color color)
   (doto *c*
         (cairo-new-path)
-        (cairo-set-line-width (line-width))
+        (cairo-set-line-width *line-width*)
         (cairo-set-dash (make-f64vector 0) 0 0)
         (cairo-rectangle x1 y1 width height)
         (cairo-fill)
@@ -150,7 +163,7 @@
   (set-color color)
   (doto *c*
         (cairo-new-path)
-        (cairo-set-line-width (line-width))
+        (cairo-set-line-width *line-width*)
         (cairo-set-dash (make-f64vector 0) 0 0)
         (cairo-rectangle x1 y1 width height)
         (cairo-stroke)
@@ -158,7 +171,7 @@
 
 (define (draw-line x1 y1 x2 y2
                    #!key
-                   (width (line-width))
+                   (width *line-width*)
                    (color solid-white)
                    (style #:solid))
   (doto *c*
@@ -193,10 +206,10 @@
                             ((#:right) (- x w))
                             (else x)))
                       (fy y))
-                  (apply cairo-set-source-rgba `(,*c* ,@(font-color)))
+                  (apply cairo-set-source-rgba `(,*c* ,@*font-color*))
                   (doto *c*
                         (cairo-move-to fx fy)
-                        (cairo-set-font-size (font-size))
+                        (cairo-set-font-size *font-size*)
                         (cairo-show-text text))
                   h)))
   (if (list? text)
