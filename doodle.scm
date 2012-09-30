@@ -60,7 +60,8 @@
          update-sprite!
          world-changes
          world-inits
-         world-ends)
+         world-ends
+         world-update-delay)
 
 (import chicken scheme)
 (use (srfi 1 4 18) cairo data-structures extras sdl-base clojurian-syntax matchable)
@@ -89,10 +90,16 @@
 (define *world-inits* values)
 (define *world-changes* values)
 (define *world-ends* values)
+(define *minimum-wait* 0)
 
 (define (world-ends f) (set! *world-ends* f))
 (define (world-changes f) (set! *world-changes* f))
 (define (world-inits f) (set! *world-inits* f))
+
+(define (world-update-delay d)
+  (unless (number? d)
+          (error "Please provide a number for the world-update-delay, given " d))
+  (set! *minimum-wait* d))
 
 (define-syntax set-color
   (syntax-rules ()
@@ -480,7 +487,7 @@
           (pump (cons event events))
           (reverse events)))))
 
-(define (event-handler #!optional minimum-wait)
+(define (event-handler #!optional (minimum-wait *minimum-wait*))
   (lambda ()
     (let ((last (current-milliseconds)))
       (call-with-current-continuation
@@ -503,8 +510,8 @@
                     escape)))))
              (show!)
              (set! last now)
-             (when (< dt minimum-wait)
-               (thread-sleep! (- minimum-wait dt)))
+             (when (< (- now last) minimum-wait)
+               (thread-sleep! (- minimum-wait (- now last))))
              (loop)))))
              (call-with-current-continuation
               (lambda (k)
