@@ -86,9 +86,13 @@
     (error "This parameter can be set to procedures only, you gave it " p))
   p)
 
-(define world-ends (make-parameter void expect-procedure))
-(define world-changes (make-parameter void expect-procedure))
-(define world-inits (make-parameter void expect-procedure))
+(define *world-inits* values)
+(define *world-changes* values)
+(define *world-ends* values)
+
+(define (world-ends f) (set! *world-ends* f))
+(define (world-changes f) (set! *world-changes* f))
+(define (world-inits f) (set! *world-inits* f))
 
 (define-syntax set-color
   (syntax-rules ()
@@ -492,7 +496,7 @@
                    (fprintf (current-error-port) "Exception in world-changes: ~a, disabling world-changes.~%" ((condition-property-accessor 'exn 'message) e))
                    (k (world-changes values)))
                  (lambda ()
-                   ((world-changes)
+                   (*world-changes*
                     (map (cut translate-events <> escape)
                          (collect-events))
                     dt
@@ -509,7 +513,7 @@
                    (fprintf (current-error-port) "Exception in world-ends: ~a, ignoring world-ends.~%" ((condition-property-accessor 'exn 'message) e))
                    (k (world-ends values)))
                  (lambda ()
-                   ((world-ends))))))
+                   (*world-ends*)))))
              (sdl-quit))))
 
 (define (run-event-loop #!key
@@ -522,7 +526,7 @@
         (fprintf (current-error-port) "Exception in world-inits: ~a, ignoring world-inits.~%" ((condition-property-accessor 'exn 'message) e))
         (k (world-inits values)))
       (lambda ()
-        ((world-inits))))))
+        (*world-inits*)))))
   (sdl-flip *s*)
   (if run-in-background
       (thread-start!
