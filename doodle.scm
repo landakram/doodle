@@ -66,28 +66,28 @@
 (import chicken scheme)
 (use (srfi 1 4 18) cairo data-structures extras sdl-base clojurian-syntax matchable)
 
-(define *font-color* '(list 1 1 1 1))
+(define *font-color* '(1 1 1 1))
 (define (font-color . c)
  (if (null? c)
      *font-color*
-     (set! *font-color* c)))
+     (set! *font-color* (car c))))
 (define *font-size* 12)
 (define (font-size . s)
   (if (null? s)
       *font-size*
-      (set! *font-size* s)))
+      (set! *font-size* (car s))))
 
 (define *line-width* 2.0)
 (define (line-width . w)
   (if (null? w)
       *line-width*
-      (set! *line-width* w)))
+      (set! *line-width* (car w))))
 
 (define *current-background* '(0 0 0 1))
 (define (current-background . c)
   (if (null? c)
       *current-background*
-      (set! *current-background* c)))
+      (set! *current-background* (car c))))
 
 (define solid-black (list 0 0 0 1))
 (define solid-white (list 1 1 1 1))
@@ -206,7 +206,7 @@
                             ((#:right) (- x w))
                             (else x)))
                       (fy y))
-                  (apply cairo-set-source-rgba `(,*c* ,@*font-color*))
+                  (apply cairo-set-source-rgba (cons *c* *font-color*))
                   (doto *c*
                         (cairo-move-to fx fy)
                         (cairo-set-font-size *font-size*)
@@ -287,7 +287,7 @@
       (height (cairo-image-surface-get-height *c-surface*)))
   (if (list? color)
       (begin
-        (apply cairo-set-source-rgba `(,*c* ,@color))
+        (apply cairo-set-source-rgba (cons *c* color))
         (doto *c*
               (cairo-rectangle 0 0 width height)
               (cairo-fill)
