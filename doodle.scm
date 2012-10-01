@@ -514,6 +514,7 @@
                 (with-exception-handler
                  (lambda (e)
                    (fprintf (current-error-port) "Exception in world-changes: ~a, disabling world-changes.~%" ((condition-property-accessor 'exn 'message) e))
+                   (print-call-chain (current-error-port))
                    (k (world-changes values)))
                  (lambda ()
                    (*world-changes*
@@ -531,6 +532,7 @@
                 (with-exception-handler
                  (lambda (e)
                    (fprintf (current-error-port) "Exception in world-ends: ~a, ignoring world-ends.~%" ((condition-property-accessor 'exn 'message) e))
+                   (print-call-chain (current-error-port))
                    (k (world-ends values)))
                  (lambda ()
                    (*world-ends*)))))
@@ -545,6 +547,7 @@
      (with-exception-handler
       (lambda (e)
         (fprintf (current-error-port) "Exception in world-inits: ~a, ignoring world-inits.~%" ((condition-property-accessor 'exn 'message) e))
+        (print-call-chain (current-error-port))
         (k (world-inits values)))
       (lambda ()
         (*world-inits*)))))
