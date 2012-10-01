@@ -282,7 +282,7 @@
 
   (sdl-flip *s*))
 
-(define (clear-screen #!optional (color (current-background)))
+(define (clear-screen #!optional (color *current-background*))
 (let ((width (cairo-image-surface-get-width *c-surface*))
       (height (cairo-image-surface-get-height *c-surface*)))
   (if (list? color)
