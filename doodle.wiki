@@ -110,7 +110,7 @@ string pointing to a PNG file.
 
 Causes a redraw of the window.
 
-<procedure>(clear-screen! #!optional (color (current-background)))</procedure>
+<procedure>(clear-screen #!optional (color (current-background)))</procedure>
 
 Fills the screen with the {{current-background}} color. Color can
 also be given as a string representing a filename to a PNG image which
