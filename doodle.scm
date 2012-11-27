@@ -502,13 +502,12 @@
 
 (define (event-handler minimum-wait)
   (lambda ()
-    (let ((last (current-milliseconds)))
+    (let ((last (time->seconds (current-time))))
       (call-with-current-continuation
        (lambda (escape)
          (let loop ()
-           (let* ((now (current-milliseconds))
-                  (dt (min (/ 1 30) (/ (- now last)
-                                       1000))))
+           (let* ((now (time->seconds (current-time)))
+                  (dt (- now last)))
              (call-with-current-continuation
               (lambda (k)
                 (with-exception-handler
@@ -524,8 +523,9 @@
                     escape)))))
              (show!)
              (set! last now)
-             (when (< (- now last) minimum-wait)
-               (thread-sleep! (- minimum-wait (- now last))))
+	     (let ((duration (- (time->seconds (current-time)) last)))
+	       (when (< duration minimum-wait)
+		     (thread-sleep! (- minimum-wait duration))))
              (loop)))))
              (call-with-current-continuation
               (lambda (k)
