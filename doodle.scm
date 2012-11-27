@@ -109,10 +109,12 @@
 (define (world-changes f) (set! *world-changes* f))
 (define (world-inits f) (set! *world-inits* f))
 
-(define (world-update-delay d)
-  (unless (number? d)
-          (error "Please provide a number for the world-update-delay, given " d))
-  (set! *minimum-wait* d))
+(define (world-update-delay . d)
+  (if (null? d)
+      *minimum-wait*
+      (if (number? (car d))
+	  (set! *minimum-wait* (car d))
+	  (error "Please provide a number for the world-update-delay, given " (car d)))))
 
 (define-syntax set-color
   (syntax-rules ()
@@ -500,7 +502,7 @@
           (pump (cons event events))
           (reverse events)))))
 
-(define (event-handler minimum-wait)
+(define (event-handler)
   (lambda ()
     (let ((last (time->seconds (current-time))))
       (call-with-current-continuation
@@ -524,8 +526,8 @@
              (show!)
              (set! last now)
 	     (let ((duration (- (time->seconds (current-time)) last)))
-	       (when (< duration minimum-wait)
-		     (thread-sleep! (- minimum-wait duration))))
+	       (when (< duration *minimum-wait*)
+		     (thread-sleep! (- *minimum-wait* duration))))
              (loop)))))
              (call-with-current-continuation
               (lambda (k)
@@ -554,7 +556,7 @@
   (sdl-flip *s*)
   (if run-in-background
       (thread-start!
-       (make-thread (event-handler minimum-wait) "doodle-event-loop"))
+       (make-thread (event-handler) "doodle-event-loop"))
       (thread-join!
        (thread-start!
-        (make-thread (event-handler minimum-wait) "doodle-event-loop"))))))
+        (make-thread (event-handler) "doodle-event-loop"))))))
