@@ -10,13 +10,21 @@ A minimal game 'framework' inspired by [[http://love2d.org/|löve]].
 
 '''This is still a work in progress and subject to change!'''
 
+=== Code repository
+
+The source code for doodle is hosted on [[https://bitbucket.org/ckeen/doodle|bitbucket]].
+
+You can grab it with git:
+
+''git clone https://bitbucket.org/ckeen/doodle.git''
+
 === Author
 
 [[/users/christian-kellermann|Christian Kellermann]]
 
 === Requirements
 
-Requires the [[miscmacros]], [[cairo]] and [[sdl]] extensions.
+Requires the [[clojurian]], [[cairo]] and [[sdl-base]] extensions.
 
 === General program flow of a doodle
 
@@ -28,9 +36,9 @@ event loop, world-ends last and world-changes for every iteration.
 world-inits and world-ends are thunks, whereas world-changes has the
 following signature:
 
-<procedure>(world-changes (lambda (event dt escape-continuation) ...)</procedure>
+<procedure>(world-changes (lambda (events dt escape-continuation) ...))</procedure>
 
-; event : holds the occured event of this loop iteration
+; event : holds the occured list of events of this loop iteration
 ; dt : holds the time delta between the last and this iteration
 ; escape-continuation : holds the continuation that will exit the loop
 
@@ -51,7 +59,7 @@ future versions.
 
 ==== Event loop
 ===== Procedures
-<procedure>(run-event-loop #!key (run-in-background #f) (minimum-wait 0))</procedure>
+<procedure>(run-event-loop #!key (run-in-background #f) (minimum-wait *minimum-wait*))</procedure>
 
 Starts the event loop and runs {{world-inits}}. If
 {{run-in-background}} is #t a new thread is started. Within the event
@@ -61,21 +69,21 @@ time delta of the last call and the events that occured. If
 {{minimum-wait}} the thread will sleep for the remaining
 time. {{minimum-wait}} takes a value in seconds.
 
-===== Parameters
-<parameter>(world-inits (lambda () ...))</parameter>
+<procedure>(world-inits (lambda () ...))</procedure>
 
 A thunk that is called once when the event loop is started.
 
-<parameter>(world-ends (lambda () ...))</parameter>
+<procedure>(world-ends (lambda () ...))</procedure>
 
 A thunk that is called once when the even loop is exited.
 
-<parameter>(world-changes (lambda (event dt exit-continuation) ...))</parameter>
+<procedure>(world-changes (lambda (events dt exit-continuation) ...))</procedure>
 
 A procedure that gets called every iteration of the event loop. The
-{{event}} parameter holds the event, {{dt}} is the time difference in
-seconds between the last and current iteration.
-{{exit-continuation}} can be used to jump out of the event-loop.
+{{events}} parameter holds the list of events, {{dt}} is the time
+difference in milliseconds between the last and current
+iteration. {{exit-continuation}} can be used to jump out of the
+event-loop.
 
 <parameter>(world-update-delay flonum)</parameter>
 
@@ -87,7 +95,8 @@ One event is a list containing information about the individual
 event. There are currently 3 types of handled events:
 
 ; quit : The quit event has the following form {{(quit)}}.
-; key events : The first element of the list is either the symbol {{pressed}} or {{released}} followed by either the integer for the key code or the symbols {{up}}, {{down}}, {{left}} or {{right}} representing cursor keys.
+; key events : The first element of the list is the symbol {{key}} followed by either the symbol {{pressed}} or {{released}} followed by either the integer for the key code or the symbols {{up}}, {{down}}, {{left}} or {{right}} representing cursor keys.
+; mouse events: The first element of this list is the symbol {{mouse}}. There are three types of events: {{pressed}}, {{released}} and {{moved}}. The first two are followed by three values {{x}} {{y}} and {{button}}, representing the coordinates of the pointer and the button number being pressed or released. Mouse buttons are numbered 1-5, with 4,5 being rotations of the mouse wheel. {{moved}} events have the coordinates as their only arguments.
 ; unknown : This will list all other events. The list contains the symbol {{unknown}} and the SDL event type. See the SDL egg documentation for hints on what this may be.
 
 ==== Drawing
@@ -104,7 +113,7 @@ values one number each. Currently there are two predefined colors:
 <procedure>(new-doodle #!key (width 680) (height 460) (title "Doodle") (background solid-black) (fullscreen #f))</procedure>
 
 Initialises the internal state and createas a window with the given
-dimensions and title.
+dimensions and title. If background is a string it will be interpreted as a filename pointing to a PNG file which will be loaded as background.
 
 The background parameter can either be a doodle RGBA color list or a
 string pointing to a PNG file.
@@ -159,49 +168,164 @@ Print the given text in one line starting on point
 parameter. Supported alignment values are {{#:left}}, {{#:center}} and
 {{#:right}}.
 
+<procedure>(text-width text)</procedure>
+
+Returns multiple values: The ''width'' and ''height'' in pixels of the
+given ''text'' when rendered with the current font settings. ''text''
+is assumed to be a string.
+
 <procedure>(save-screenshot filename)</procedure>
 
 Saves the current screen content to a file called {{filename}} as a
 portable network graphics (PNG). It is up to the user to provide an
 appropriate extension to the filename.
 
-===== Parameters
+===== Exported values
 
-<parameter>(font-color)</parameter>
+{{doodle-width}} and {{doodle-height}} hold the width and height of
+the window, that has been given on a call to {{(new-doodle)}}.
 
-Holds the current font color.
+===== Changing Settings
 
-<parameter>(font-size)</parameter>
+The following can be used to get or set the current values.
 
-Holds the current font-size.
+<procedure>(font-color)</procedure>
 
-<parameter>(current-background)</parameter>
+Holds the current font color. Default is black.
 
-Holds the current background color.
+<procedure>(font-size)</procedure>
 
-==== Collision detection
+Holds the current font-size. Default is 12.
 
-*sprites*
+<procedure>(current-background)</procedure>
 
-<procedure>add-sprite!</procedure>
+Holds the current background color. Default is black.
 
-<procedure>check-for-collisions</procedure>
+<procedure>(line-width)</procedure>
 
-<procedure>make-sprite</procedure>
+Holds the line width used for drawing. Default is 2.0.
 
-<procedure>remove-sprite!</procedure>
+<procedure>(world-update-delay)</procedure>
 
-<procedure>update-sprite!</procedure>
+Amount of milliseconds that should pass at minimum before calling the
+world-changes procedure again.
+
+==== Images
+
+Since version 0.4 doodle supports blitting images in. The initial form
+is {{define-resource}}. This registers an image and makes it available
+through the given symbol ''name'' to all procedures that take a
+resource argument below.
+
+<procedure>(define-resource name type filename . data )</procedure>
+
+Registers a resource under the name ''name''. The resource is read
+from a file specified with ''filename''. The ''type'' argument is a
+keyword and specifies how the ''data'' argument is handled and which
+form is expected.
+
+The following types are handled:
+
+ * #:image
+
+A single image from a single file. It takes optional argumens
+''x-offset'', ''y-offset'' and ''scale-factor'' to take just a
+fraction out of the given image file and to be able to scale it.
+
+The following example does this several times:
+
+<enscript language="scheme">
+(define-resource 'water #:image "Water Block.png" *terrain-xoffset* *terrain-yoffset*)
+(define-resource 'stone #:image "Stone Block.png" *terrain-xoffset* *terrain-yoffset*)
+(define-resource 'princess #:image "Character Princess Girl.png" 0 -80)
+(define-resource 'bubble #:image "SpeechBubble.png" -15 -120)
+(define-resource 'bug #:image "Enemy Bug.png" 0 -80)
+(define-resource 'tree #:image "Tree Tall.png" 0 -80 )
+(define-resource 'heart #:image "Heart.png" 0 0 0.5)
+</enscript>
+
+ * #:tileset
+
+This assumes the image to consist of one or more square tiles. Then
+several images are referenced out of a single image file. The ''data''
+argument is expected to be a list of two elements: the tile-size and a
+list consisting of (name number) pairs (proper lists). The following
+examples makes three tiles accessible through their names: wall, floor
+and hero. They can be drawn with the {{blit-image}} procedure.
+
+<enscript language="scheme">
+(define-resource 'tiles
+                  #:tileset
+                   "../roguelike/tile.png"
+                    32
+                    '((wall 2)
+                      (floor 30)
+                      (hero 486)))
+</enscript>
+
+<procedure>(blit-image name x y rotation: angle )</procedure>
+
+Blits in the image ''name'' at position (x, y). If angle is given the
+image is rotated. The angle has to be given in degrees, negative
+values indicate counter-clockwise rotation.
 
 ==== Example
 
+The following example will show a little circle painting program. It
+requires the [[matchable]] egg.
+
 <enscript highlight="scheme">
+(use matchable doodle)
+
+(define *paint* #f)
+
+(define red '(1 0 0 0.3))
+
+(world-inits
+ (lambda ()
+   (clear-screen)
+   (set-font! "Vollkorn" 18 red)
+   (text (/ doodle-width 2)
+         (/ doodle-height 2) '("Welcome to doodle!"
+                               "Click the left mouse button to draw circles"
+                               "Press ESC to leave")
+         align: #:center)))
+
+(world-changes
+ (lambda (events dt exit)
+   (for-each
+    (lambda (e)
+      (match e
+       (('mouse 'pressed x y 1)
+        (set! *paint* #t)
+        (filled-circle x y 10 red))
+       (('mouse 'released x y 1)
+        (set! *paint* #f))
+       (('mouse 'moved x y)
+        (when *paint*
+          (filled-circle x y 10 red)))
+       (('key 'pressed #\esc)
+        (exit #t))
+       (else (void))))
+    events)))
+
+(new-doodle title: "Doodle paint" background: solid-white)
+(run-event-loop)
+
 </enscript>
 
 === Changelog
 
 ; 0.1 : Initial version
-
+; 0.2 : bogus tag, sorry
+; 0.3 : Fixed event handling, added mouse events, background images possible
+; 0.4 : blit-image and define-resources added, text-width and line-width are exported
+; 0.5-0.6 : Yours truly messing up the meta data, please ignore
+; 0.7 : Correct dependencies to cairo and sdl
+; 0.8 : Fixed text procedure, closed path on circles
+; 0.9 : Changed dependency from sdl egg to sdl-base
+; 0.10-0.12 : Fiddling with meta files
+; 0.13 : callbacks are wrapped in exception handlers, parameters are no longer used, added world-update-delay
 === License
 
   Copyright (c) 2012, Christian Kellermann
