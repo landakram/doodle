@@ -59,7 +59,7 @@ loop the procedure given with {{world-changes}} is called with the
 time delta of the last call and the events that occured. If
 {{minimum-wait}} is given and the delta is smaller than
 {{minimum-wait}} the thread will sleep for the remaining
-time. {{minimum-wait}} takes a value in milliseconds.
+time. {{minimum-wait}} takes a value in seconds.
 
 ===== Parameters
 <parameter>(world-inits (lambda () ...))</parameter>
@@ -74,9 +74,12 @@ A thunk that is called once when the even loop is exited.
 
 A procedure that gets called every iteration of the event loop. The
 {{event}} parameter holds the event, {{dt}} is the time difference in
-milliseconds between the last and current
-iteration. {{exit-continuation}} can be used to jump out of the
-event-loop.
+seconds between the last and current iteration.
+{{exit-continuation}} can be used to jump out of the event-loop.
+
+<parameter>(world-update-delay flonum)</parameter>
+
+The minimum delay between updates. Aka, the minimum-wait property in the event-loop.
 
 ===== Events
 
