@@ -11,7 +11,8 @@ doodle also provides a simple event loop model which has got its
 inspiration from the LUA Löve framework, making it easy to do
 animations and move sprites around.
 
-Doodle comes with an experimental sprite detection mechanism.
+Doodle comes with an experimental (which means undocumented) sprite
+collision detection mechanism.
 
 To install doodle you can use CHICKEN schemes chicken-install tool:
 
@@ -25,6 +26,9 @@ Examples:
   https://bitbucket.org/ckeen/game-of-life
 - A turtle graphic system drawing lindenmayer plants has been published at:
   https://bitbucket.org/ckeen/game-of-life/overview
+- Beesteroids, an Asteroids clone done for a talk at FrOSCon 2012:
+  https://bitbucket.org/ckeen/beesteroids (slides are at
+  http://pestilenz.org/~ckeen/little-gamer.pdf)
 
 If you know about other programs written with doodle, please let me
 know, so I can add them to this list!
