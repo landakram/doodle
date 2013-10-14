@@ -41,12 +41,14 @@
          draw-line
          define-resource
          filled-circle
+         filled-polygon
          filled-rectangle
          font-color
          font-size
          make-sprite
          line-width
          new-doodle
+         polygon
          rectangle
          remove-sprite!
          run-event-loop
@@ -190,6 +192,37 @@
   (doto *c*
         (cairo-line-to x2 y2)
         (cairo-stroke)))
+
+;; XXX does closed even make a difference?
+(define (polygon points color #!optional (closed? #t))
+  (doto *c*
+        (cairo-set-line-width *line-width*)
+        (cairo-new-path)
+        (cairo-move-to (caar points) (cadar points)))
+  (set-color color)
+  (for-each
+   (lambda (p)
+     (cairo-line-to *c* (car p) (cadr p)))
+   points)
+  (if closed?
+      (cairo-line-to *c* (caar points) (cadar points)))
+  (cairo-stroke *c*))
+
+;; XXX does closed even make a difference?
+(define (filled-polygon points color #!optional (closed? #t))
+  (doto *c*
+        (cairo-set-line-width *line-width*)
+        (cairo-set-dash (make-f64vector 0) 0 0)
+        (cairo-new-path)
+        (cairo-move-to (caar points) (cadar points)))
+  (set-color color)
+  (for-each
+   (lambda (p)
+     (cairo-line-to *c* (car p) (cadr p)))
+   points)
+  (if closed?
+      (cairo-line-to *c* (caar points) (cadar points)))
+  (cairo-fill *c*))
 
 (define (text x y text #!key (align #:left))
   (define (overall-height text)
