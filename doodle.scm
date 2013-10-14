@@ -504,11 +504,11 @@
 
 (define (event-handler)
   (lambda ()
-    (let ((last (time->seconds (current-time))))
+    (let ((last (sdl-get-ticks)))
       (call-with-current-continuation
        (lambda (escape)
          (let loop ()
-           (let* ((now (time->seconds (current-time)))
+           (let* ((now (sdl-get-ticks))
                   (dt (- now last)))
              (call-with-current-continuation
               (lambda (k)
@@ -525,9 +525,9 @@
                     escape)))))
              (show!)
              (set! last now)
-	     (let ((duration (- (time->seconds (current-time)) last)))
+             (let ((duration (- (sdl-get-ticks) last)))
 	       (when (< duration *minimum-wait*)
-		     (thread-sleep! (- *minimum-wait* duration))))
+                 (thread-sleep! (- *minimum-wait* duration))))
              (loop)))))
              (call-with-current-continuation
               (lambda (k)
