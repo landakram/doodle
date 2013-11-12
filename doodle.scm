@@ -193,36 +193,27 @@
         (cairo-line-to x2 y2)
         (cairo-stroke)))
 
-;; XXX does closed even make a difference?
-(define (polygon points color #!optional (closed? #t))
+(define (%polygon points color closed? method)
   (doto *c*
         (cairo-set-line-width *line-width*)
-        (cairo-new-path)
-        (cairo-move-to (caar points) (cadar points)))
+        (cairo-new-path))
+  (when (and (not (null? points))
+             (pair? (car points)))
+    (cairo-move-to *c* (caar points) (cadar points)))
   (set-color color)
   (for-each
    (lambda (p)
      (cairo-line-to *c* (car p) (cadr p)))
-   points)
+   (cdr points))
   (if closed?
-      (cairo-line-to *c* (caar points) (cadar points)))
-  (cairo-stroke *c*))
+      (cairo-close-path *c*))
+  (method *c*))
 
-;; XXX does closed even make a difference?
-(define (filled-polygon points color #!optional (closed? #t))
-  (doto *c*
-        (cairo-set-line-width *line-width*)
-        (cairo-set-dash (make-f64vector 0) 0 0)
-        (cairo-new-path)
-        (cairo-move-to (caar points) (cadar points)))
-  (set-color color)
-  (for-each
-   (lambda (p)
-     (cairo-line-to *c* (car p) (cadr p)))
-   points)
-  (if closed?
-      (cairo-line-to *c* (caar points) (cadar points)))
-  (cairo-fill *c*))
+(define (polygon points color #!key (closed? #t))
+  (%polygon points color closed? cairo-stroke))
+
+(define (filled-polygon points color #!key (closed? #t))
+  (%polygon points color closed? cairo-fill))
 
 (define (text x y text #!key (align #:left))
   (define (overall-height text)
