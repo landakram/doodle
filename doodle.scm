@@ -38,6 +38,7 @@
          current-background
          doodle-width
          doodle-height
+         doodle-context
          draw-line
          define-resource
          filled-circle
@@ -98,6 +99,7 @@
 (define *c-surface* #f)
 (define *s* #f)
 
+(define (doodle-context) *c*)
 (define doodle-width #f)
 (define doodle-height #f)
 
