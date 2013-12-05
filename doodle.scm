@@ -102,14 +102,20 @@
 (define doodle-height #f)
 
 
-(define *world-inits* values)
-(define *world-changes* values)
-(define *world-ends* values)
+(define *world-inits* (cons values values))
+(define *world-changes* (cons values values))
+(define *world-ends* (cons values values))
 (define *minimum-wait* 0)
 
-(define (world-ends f) (set! *world-ends* f))
-(define (world-changes f) (set! *world-changes* f))
-(define (world-inits f) (set! *world-inits* f))
+(define (world-ends f)
+  (set-cdr! *world-ends* (car *world-ends*))
+  (set-car! *world-ends* f))
+(define (world-changes f)
+  (set-cdr! *world-changes* (car *world-changes*))
+  (set-car! *world-changes* f))
+(define (world-inits f)
+  (set-cdr! *world-inits* (car *world-inits*))
+  (set-car! *world-inits* f))
 
 (define (world-update-delay . d)
   (if (null? d)
@@ -538,11 +544,14 @@
               (lambda (k)
                 (with-exception-handler
                  (lambda (e)
-                   (fprintf (current-error-port) "Exception in world-changes: ~a, disabling world-changes.~%" ((condition-property-accessor 'exn 'message) e))
+                   (fprintf (current-error-port)
+                            "Exception in world-changes: ~a ~a.~%"
+                            ((condition-property-accessor 'exn 'message) e)
+                            ((condition-property-accessor 'exn 'arguments) e))
                    (print-call-chain (current-error-port))
-                   (k (world-changes values)))
+                   (k (world-changes (cdr *world-changes*))))
                  (lambda ()
-                   (*world-changes*
+                   ((car *world-changes*)
                     (map (cut translate-events <> escape)
                          (collect-events))
                     dt
@@ -557,11 +566,13 @@
               (lambda (k)
                 (with-exception-handler
                  (lambda (e)
-                   (fprintf (current-error-port) "Exception in world-ends: ~a, ignoring world-ends.~%" ((condition-property-accessor 'exn 'message) e))
+                   (fprintf (current-error-port) "Exception in world-ends: ~a ~a~%"
+                            ((condition-property-accessor 'exn 'message) e)
+                            ((condition-property-accessor 'exn 'arguments) e))
                    (print-call-chain (current-error-port))
-                   (k (world-ends values)))
+                   (k (world-ends (cdr *world-ends*))))
                  (lambda ()
-                   (*world-ends*)))))
+                   ((car *world-ends*))))))
              (sdl-quit))))
 
 (define (run-event-loop #!key
@@ -572,11 +583,13 @@
    (lambda (k)
      (with-exception-handler
       (lambda (e)
-        (fprintf (current-error-port) "Exception in world-inits: ~a, ignoring world-inits.~%" ((condition-property-accessor 'exn 'message) e))
+        (fprintf (current-error-port) "Exception in world-inits: ~a ~a.~%"
+                 ((condition-property-accessor 'exn 'message) e)
+                 ((condition-property-accessor 'exn 'arguments) e))
         (print-call-chain (current-error-port))
-        (k (world-inits values)))
+        (k (cdr *world-inits*)))
       (lambda ()
-        (*world-inits*)))))
+        ((car *world-inits*))))))
   (sdl-flip *s*)
   (if run-in-background
       (thread-start!
