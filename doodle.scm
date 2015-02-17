@@ -64,10 +64,10 @@
          world-changes
          world-inits
          world-ends
-         world-update-delay)
+         world-fps)
 
 (import chicken scheme)
-(use (srfi 1 4 18) cairo data-structures extras sdl-base clojurian-syntax matchable)
+(use (srfi 1 4 18) cairo data-structures extras sdl-base sdl-gfx clojurian-syntax matchable)
 
 (define *font-color* '(1 1 1 1))
 (define (font-color . c)
@@ -107,7 +107,8 @@
 (define *world-inits* (cons values values))
 (define *world-changes* (cons values values))
 (define *world-ends* (cons values values))
-(define *minimum-wait* 0)
+(define *fps* 60)
+(define *fps-manager* #f)
 
 (define (world-ends f)
   (set-cdr! *world-ends* (car *world-ends*))
@@ -119,12 +120,12 @@
   (set-cdr! *world-inits* (car *world-inits*))
   (set-car! *world-inits* f))
 
-(define (world-update-delay . d)
+(define (world-fps . d)
   (if (null? d)
-      *minimum-wait*
-      (if (number? (car d))
-	  (set! *minimum-wait* (car d))
-	  (error "Please provide a number for the world-update-delay, given " (car d)))))
+      *fps*
+      (if (and (number? (car d)) (<= FPS_LOWER_LIMIT (car d) FPS_UPPER_LIMIT))
+	  (set! *fps* (car d))
+	  (error "Please provide a number for the world-fps within the FPS upper and lower limits, given " (car d)))))
 
 (define-syntax set-color
   (syntax-rules ()
@@ -536,51 +537,50 @@
 
 (define (event-handler)
   (lambda ()
-    (let ((last (sdl-get-ticks)))
-      (call-with-current-continuation
-       (lambda (escape)
-         (let loop ()
-           (let* ((now (sdl-get-ticks))
-                  (dt (- now last)))
-             (call-with-current-continuation
-              (lambda (k)
-                (with-exception-handler
-                 (lambda (e)
-                   (fprintf (current-error-port)
-                            "Exception in world-changes: ~a ~a.~%"
-                            ((condition-property-accessor 'exn 'message) e)
-                            ((condition-property-accessor 'exn 'arguments) e))
-                   (print-call-chain (current-error-port))
-                   (k (world-changes (cdr *world-changes*))))
-                 (lambda ()
-                   ((car *world-changes*)
-                    (map (cut translate-events <> escape)
-                         (collect-events))
-                    dt
-                    escape)))))
-             (show!)
-             (set! last now)
-             (let ((duration (- (sdl-get-ticks) last)))
-	       (when (< duration *minimum-wait*)
-                 (thread-sleep! (- *minimum-wait* duration))))
-             (loop)))))
-             (call-with-current-continuation
-              (lambda (k)
-                (with-exception-handler
-                 (lambda (e)
-                   (fprintf (current-error-port) "Exception in world-ends: ~a ~a~%"
-                            ((condition-property-accessor 'exn 'message) e)
-                            ((condition-property-accessor 'exn 'arguments) e))
-                   (print-call-chain (current-error-port))
-                   (k (world-ends (cdr *world-ends*))))
-                 (lambda ()
-                   ((car *world-ends*))))))
-             (sdl-quit))))
+    (call-with-current-continuation
+     (lambda (escape)
+       (let loop ()
+         (let* ((dt (sdl-get-framerate-delay *fps-manager*)))
+           (call-with-current-continuation
+            (lambda (k)
+              (with-exception-handler
+               (lambda (e)
+                 (fprintf (current-error-port)
+                          "Exception in world-changes: ~a ~a.~%"
+                          ((condition-property-accessor 'exn 'message) e)
+                          ((condition-property-accessor 'exn 'arguments) e))
+                 (print-call-chain (current-error-port))
+                 (k (world-changes (cdr *world-changes*))))
+               (lambda ()
+                 ((car *world-changes*)
+                  (map (cut translate-events <> escape)
+                       (collect-events))
+                  dt
+                  escape)))))
+           (show!)
+           (loop)))))
+    (call-with-current-continuation
+     (lambda (k)
+       (with-exception-handler
+        (lambda (e)
+          (fprintf (current-error-port) "Exception in world-ends: ~a ~a~%"
+                   ((condition-property-accessor 'exn 'message) e)
+                   ((condition-property-accessor 'exn 'arguments) e))
+          (print-call-chain (current-error-port))
+          (k (world-ends (cdr *world-ends*))))
+        (lambda ()
+          ((car *world-ends*))))))
+    (sdl-quit)))
 
 (define (run-event-loop #!key
                         (run-in-background #f)
-                        (minimum-wait *minimum-wait*))
-  (set! *minimum-wait* minimum-wait)
+                        (fps *fps*))
+
+  (set! *fps* fps)
+  (set! *fps-manager* (make-fps-manager))
+  (sdl-init-Framerate *fps-manager*)
+  (sdl-set-framerate *fps-manager* *fps*)
+
   (call-with-current-continuation
    (lambda (k)
      (with-exception-handler
