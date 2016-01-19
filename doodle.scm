@@ -494,21 +494,24 @@
                   'pressed 'released)
               x y b)))))
 
+;; Key translation tables
+(include "doodle-keys.scm")
+
+(define (get-modifiers mod)
+  (filter-map (lambda (m)
+                (and (not (zero? (bitwise-and mod (car m))))
+                     (cdr m)))
+          modifier-table))
+
 (define (translate-key-event type event)
-  (let ((k (sdl-event-sym event)))
+  (let ((k (sdl-event-sym event))
+        (mods (get-modifiers (sdl-event-mod event))))
     (list 'key
      (if (equal? type SDL_KEYUP)
          'released 'pressed)
-     (cond ((equal? k SDLK_UP)
-            'up)
-           ((equal? k SDLK_DOWN)
-            'down)
-           ((equal? k SDLK_LEFT)
-            'left)
-           ((equal? k SDLK_RIGHT)
-            'right)
-           ((integer->char k)
-            => identity)
+     mods
+     (cond ((alist-ref k translation-table equal?) => identity)
+           ((integer->char k) => identity)
            (else 'unknown)))))
 
 (define (translate-events event escape)
