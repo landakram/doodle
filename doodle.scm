@@ -141,8 +141,8 @@
   (define ex (make-cairo-text-extents-type))
   (cairo-set-font-size *c* *font-size*)
   (cairo-text-extents *c* text ex)
-  (values (cairo-text-extents-width ex)
-          (cairo-text-extents-height ex)))
+  (values (cairo-text-extents-x-advance ex)
+          (cairo-text-extents-y-advance ex)))
 
 (define (circle x y diameter color)
   (set-color color)
