@@ -54,7 +54,7 @@
 
    (set! circle-y (+ circle-y (* direction (* speed (/ dt 1000)))))
 
-   (inc! acc dt)
+   (inc! acc (inexact->exact (ceiling dt)))
    (when (zero? (modulo acc 60))
      (set! acc 0)
      (set! circle-diameter (+ circle-diameter (* pulsing-speed pulsing-direction))))
