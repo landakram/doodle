@@ -66,8 +66,19 @@
          world-ends
          world-fps)
 
-(import chicken scheme)
-(use (srfi 1 4 18) cairo data-structures extras sdl-base sdl-gfx clojurian-syntax matchable)
+  (import (chicken base) scheme)
+  (import (chicken format))
+  (import (chicken bitwise))
+  (import (chicken file))
+  (import (chicken condition))
+  (import srfi-1 srfi-4 srfi-18)
+  (import cairo)
+  (import cairo.surface.image)
+;;  (import extras)
+  (import sdl-base)
+;;  (import sdl-gfx)
+  (import (clojurian syntax))
+  (import matchable)
 
 (define *font-color* '(1 1 1 1))
 (define (font-color . c)
