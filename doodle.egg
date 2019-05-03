@@ -1,0 +1,11 @@
+;;; doodle.egg -*- Scheme -*-
+
+((synopsis "A minimal game 'framework' inspired by loeve.")
+ (author "Christian Kellermann")
+ (maintainer "Christian Kellermann")
+ (category graphics)
+ (license "BSD")
+ (dependencies cairo clojurian matchable sdl-base sdl-gfx)
+ (components (extension doodle
+                        (source-dependencies "doodle-keys.scm"
+                                             "doodle-colors.scm"))))

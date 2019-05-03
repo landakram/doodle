@@ -1,0 +1,11 @@
+.envrc
+*.so
+*.link
+*.o
+*.import.scm
+*.install.sh
+*.build.sh
+*.static.c
+tests/run
+tests/*.svg
+salmonella*

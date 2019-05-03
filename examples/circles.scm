@@ -1,4 +1,4 @@
-(use matchable doodle)
+(import matchable doodle)
 
 (define *paint* #f)
 

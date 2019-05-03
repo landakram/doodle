@@ -1,8 +1,0 @@
-((egg "doodle.egg")
- (synopsis "A minimal game 'framework' inspired by loeve.")
- (author "Christian Kellermann")
- (maintainer "Christian Kellermann")
- (category graphics)
- (license "BSD")
- (needs (cairo "0.1.14") clojurian matchable (sdl-base "0.1") (sdl-gfx "0.2"))
- (files "doodle.setup" "doodle.scm" "doodle.meta"))

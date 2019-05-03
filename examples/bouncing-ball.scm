@@ -1,4 +1,4 @@
-(use doodle sdl-base matchable miscmacros)
+(import doodle sdl-base matchable miscmacros (chicken format))
 (new-doodle)
 
 (define circle-max-diameter 40)
@@ -52,7 +52,7 @@
    (maybe-change-circle-dir)
    (maybe-change-pulse-dir)
 
-   (set! circle-y (+ circle-y (* direction (* speed (/ dt 1000)))))
+   (set! circle-y (+ circle-y (* direction (* speed (/ dt 1000.0)))))
 
    (inc! acc (inexact->exact (ceiling dt)))
    (when (zero? (modulo acc 60))

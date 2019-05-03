@@ -74,9 +74,8 @@
   (import srfi-1 srfi-4 srfi-18)
   (import cairo)
   (import cairo.surface.image)
-;;  (import extras)
   (import sdl-base)
-;;  (import sdl-gfx)
+  (import sdl-gfx)
   (import (clojurian syntax))
   (import matchable)
 
